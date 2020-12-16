@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/textView_client"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User: jakedruth@gmail.com"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/lorem_ipsum"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView_client" />
+
+    <TextView
+        android:id="@+id/textView_like"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:drawablePadding="5dp"
+        android:gravity="center_vertical"
+        android:text="1234"
+        android:textColor="?android:attr/textColorSecondary"
+        app:drawableLeftCompat="@drawable/ic_twotone_thumb_up_24"
+        app:drawableTint="@color/grayed_out"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView_message" />
+
+    <TextView
+        android:id="@+id/textView_dislike"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:drawablePadding="5dp"
+        android:gravity="center_vertical"
+        android:text="1234"
+        android:textColor="?android:attr/textColorSecondary"
+        app:drawableLeftCompat="@drawable/ic_twotone_thumb_down_24"
+        app:drawableTint="@color/grayed_out"
+        app:layout_constraintStart_toEndOf="@+id/textView_like"
+        app:layout_constraintTop_toBottomOf="@+id/textView_message" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
