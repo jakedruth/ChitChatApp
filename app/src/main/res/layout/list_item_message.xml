@@ -3,14 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingLeft="24dp"
+    android:paddingTop="16dp"
+    android:paddingRight="24dp"
+    android:paddingBottom="0dp">
 
     <TextView
         android:id="@+id/textView_client"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="User: jakedruth@gmail.com"
-        android:textSize="14sp"
+        android:text="@string/sample_user"
+        android:textColor="@color/design_default_color_on_secondary"
+        android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -18,22 +24,24 @@
         android:id="@+id/textView_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="@string/lorem_ipsum"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView_client" />
+        app:layout_constraintTop_toBottomOf="@+id/textView_date" />
 
     <TextView
         android:id="@+id/textView_like"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
         android:drawablePadding="5dp"
         android:gravity="center_vertical"
-        android:text="1234"
+        android:text="@android:string/status_bar_notification_info_overflow"
         android:textColor="?android:attr/textColorSecondary"
         app:drawableLeftCompat="@drawable/ic_twotone_thumb_up_24"
         app:drawableTint="@color/grayed_out"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/textView_message"
         app:layout_constraintTop_toBottomOf="@+id/textView_message" />
 
     <TextView
@@ -43,11 +51,32 @@
         android:layout_marginStart="16dp"
         android:drawablePadding="5dp"
         android:gravity="center_vertical"
-        android:text="1234"
+        android:text="@android:string/status_bar_notification_info_overflow"
         android:textColor="?android:attr/textColorSecondary"
         app:drawableLeftCompat="@drawable/ic_twotone_thumb_down_24"
         app:drawableTint="@color/grayed_out"
         app:layout_constraintStart_toEndOf="@+id/textView_like"
-        app:layout_constraintTop_toBottomOf="@+id/textView_message" />
+        app:layout_constraintTop_toTopOf="@+id/textView_like" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="361dp"
+        android:layout_height="5dp"
+        android:layout_marginTop="16dp"
+        android:background="#33737373"
+        android:contentDescription="@string/simple_divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView_like"
+        tools:srcCompat="@android:drawable/divider_horizontal_dark" />
+
+    <TextView
+        android:id="@+id/textView_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sample_date"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView_client" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

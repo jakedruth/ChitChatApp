@@ -15,6 +15,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.temporal.TemporalAdjusters.next
+import java.util.*
+import kotlin.random.Random
 
 const val TAG = "MAIN_ACTIVITY"
 
@@ -32,8 +37,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         Log.d(TAG, "On Create")
 
-        for (x in 0..10)
-            chitChatViewModel.messages.add(Message())
+        for (x in 0..10) {
+            var message = Message()
+            message.client = chitChatViewModel.client
+            message.message = resources.getString(R.string.lorem_ipsum)
+            message.date = Date()
+            message.likes = Random.nextInt(0, 10)
+            message.dislikes = Random.nextInt(0, 10)
+            message.ip = "127.0.0.1"
+            chitChatViewModel.messages.add(message)
+        }
 
         setUpView()
         setUpListeners()
@@ -59,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         private var messageLikeState: MessageLikeState = MessageLikeState.Neither
         private var message: Message = Message()
         private var clientTextView: TextView = view.findViewById(R.id.textView_client)
+        private var dateTextView: TextView = view.findViewById(R.id.textView_date)
         private var messageTextView: TextView = view.findViewById(R.id.textView_message)
         private var likeTextView: TextView = view.findViewById(R.id.textView_like)
         private var dislikeTextView: TextView = view.findViewById(R.id.textView_dislike)
@@ -84,7 +98,12 @@ class MainActivity : AppCompatActivity() {
         fun bind(message: Message) {
             this.message = message
 
-            // Do Stuff
+            clientTextView.text = message.client
+            val sdf = SimpleDateFormat(resources.getString(R.string.date_pattern))
+            dateTextView.text = sdf.format(message.date)
+            messageTextView.text = message.message
+            likeTextView.text = message.likes.toString()
+            dislikeTextView.text = message.dislikes.toString()
         }
 
         private fun setMessagedLiked(likeState: MessageLikeState) {

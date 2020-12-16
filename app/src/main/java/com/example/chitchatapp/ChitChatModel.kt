@@ -7,7 +7,7 @@ import java.util.*
 const val url: String = "https://www.stepoutnyc.com/chitchat"
 
 class ChitChatViewModel : ViewModel() {
-    private var client: String = "jacob.ruth@mymail.champlain.edu"
+    var client: String = "jacob.ruth@mymail.champlain.edu"
     private var key: String = "50f9078f-f254-4c0e-a173-e77db72e2671"
 
     var messages: MutableList<Message> = mutableListOf<Message>()
