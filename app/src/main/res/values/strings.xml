@@ -7,4 +7,5 @@
     <string name="sample_user">jacob.ruth@mymail.champlain.edu</string>
     <string name="simple_divider">Simple Divider</string>
     <string name="date_pattern">"MM-dd-yyy | hh:mm:ss"</string>
+    <string name="write_message">Post Your Own Message</string>
 </resources>

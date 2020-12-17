@@ -1,25 +1,19 @@
 package com.example.chitchatapp
 
-import android.graphics.Color
-import android.graphics.ColorFilter
+import android.animation.ObjectAnimator
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.temporal.TemporalAdjusters.next
 import java.util.*
-import kotlin.random.Random
 
 const val TAG = "MAIN_ACTIVITY"
 
@@ -30,6 +24,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var recyclerView: RecyclerView
+    private lateinit var writeMessageButton: ImageButton
+
     private lateinit var adapter: MessagesAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,32 +33,59 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         Log.d(TAG, "On Create")
 
-        for (x in 0..10) {
-            var message = Message()
-            message.client = chitChatViewModel.client
-            message.message = resources.getString(R.string.lorem_ipsum)
-            message.date = Date()
-            message.likes = Random.nextInt(0, 10)
-            message.dislikes = Random.nextInt(0, 10)
-            message.ip = "127.0.0.1"
-            chitChatViewModel.messages.add(message)
-        }
+//        for (x in 0..10) {
+//            var message = Message()
+//            message.client = chitChatViewModel.client
+//            message.message = resources.getString(R.string.lorem_ipsum)
+//            message.date = Date().toString()
+//            message.likes = Random.nextInt(0, 10)
+//            message.dislikes = Random.nextInt(0, 10)
+//            message.ip = "127.0.0.1"
+//            chitChatViewModel.messages.add(message)
+//        }
 
         setUpView()
         setUpListeners()
         setUpRecyclerView()
+
+        // Debugging
+
+        chitChatViewModel.getMessages(this) { updateUI() }
+
     }
 
     private fun setUpView() {
         recyclerView = findViewById(R.id.recyclerView)
+        writeMessageButton = findViewById(R.id.imageButton_WriteMessage)
     }
 
     private fun setUpListeners() {
+        writeMessageButton.setOnClickListener {
+            //hideWriteMessageButton()
+            // TODO: Create Fragment that displays a message popup
+        }
+    }
 
+    private fun hideWriteMessageButton() {
+        ObjectAnimator.ofFloat(writeMessageButton, "translationX", 300f).apply {
+            duration = 500
+            start()
+        }
+    }
+
+    private fun showWriteMessageButton() {
+        ObjectAnimator.ofFloat(writeMessageButton, "translationX", 0f).apply {
+            duration = 500
+            start()
+        }
     }
 
     private fun setUpRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        updateUI()
+    }
+
+    private fun updateUI() {
         adapter = MessagesAdapter(chitChatViewModel.messages)
         recyclerView.adapter = adapter
         adapter.notifyDataSetChanged()
@@ -99,8 +122,8 @@ class MainActivity : AppCompatActivity() {
             this.message = message
 
             clientTextView.text = message.client
-            val sdf = SimpleDateFormat(resources.getString(R.string.date_pattern))
-            dateTextView.text = sdf.format(message.date)
+            //val sdf = SimpleDateFormat(resources.getString(R.string.date_pattern))
+            dateTextView.text = message.date
             messageTextView.text = message.message
             likeTextView.text = message.likes.toString()
             dislikeTextView.text = message.dislikes.toString()
@@ -134,7 +157,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    inner class MessagesAdapter(var messages: List<Message>) : RecyclerView.Adapter<MessageHolder>() {
+    inner class MessagesAdapter(var messages: Array<Message>) : RecyclerView.Adapter<MessageHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageHolder {
             Log.d(TAG, "MessagesAdapter.onCreateViewHolder(...) Called")
