@@ -1,6 +1,9 @@
 package com.example.chitchatapp
 
 import android.animation.ObjectAnimator
+import android.app.Activity
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import androidx.appcompat.app.AppCompatActivity
@@ -8,8 +11,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.core.content.edit
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,58 +23,85 @@ import java.util.*
 
 const val TAG = "MAIN_ACTIVITY"
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SendMessageDialog.Callbacks {
+
+    companion object {
+        private var sharedPreferences: SharedPreferences? = null
+
+        fun tryLikeMessage(id: String, value: Boolean): Boolean {
+            if (sharedPreferences == null)
+                return false
+
+            val containsID = sharedPreferences!!.contains(id)
+
+            if (containsID) // If the key exist, we can't edit it
+                return false
+
+            sharedPreferences?.edit {
+                putBoolean(id, value)
+                apply()
+            }
+
+            return true
+        }
+
+        fun getLikeMessage(id: String): Boolean? {
+            if (sharedPreferences == null)
+                return null
+
+            if (sharedPreferences!!.contains(id))
+                return sharedPreferences!!.getBoolean(id, false)
+
+            return null
+        }
+    }
 
     private val chitChatViewModel: ChitChatViewModel by lazy {
         return@lazy ChitChatViewModel()
     }
 
+    private lateinit var refreshButton: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var writeMessageButton: ImageButton
 
-    private lateinit var adapter: MessagesAdapter
+    private var adapter = MessagesAdapter(emptyArray())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Log.d(TAG, "On Create")
 
-//        for (x in 0..10) {
-//            var message = Message()
-//            message.client = chitChatViewModel.client
-//            message.message = resources.getString(R.string.lorem_ipsum)
-//            message.date = Date().toString()
-//            message.likes = Random.nextInt(0, 10)
-//            message.dislikes = Random.nextInt(0, 10)
-//            message.ip = "127.0.0.1"
-//            chitChatViewModel.messages.add(message)
-//        }
+        sharedPreferences = getPreferences(Context.MODE_PRIVATE) ?: return
 
         setUpView()
         setUpListeners()
         setUpRecyclerView()
 
-        // Debugging
-
-        chitChatViewModel.getMessages(this) { updateUI() }
-
+        chitChatViewModel.init(this)
+        chitChatViewModel.refreshMessages { updateUI() }
     }
 
     private fun setUpView() {
+        refreshButton = findViewById(R.id.button_refresh)
         recyclerView = findViewById(R.id.recyclerView)
         writeMessageButton = findViewById(R.id.imageButton_WriteMessage)
     }
 
     private fun setUpListeners() {
+        refreshButton.setOnClickListener {
+            chitChatViewModel.refreshMessages { updateUI() }
+        }
+
         writeMessageButton.setOnClickListener {
-            //hideWriteMessageButton()
-            // TODO: Create Fragment that displays a message popup
+            SendMessageDialog.newInstance().show(supportFragmentManager, SendMessageDialog.TAG)
+            hideWriteMessageButton()
         }
     }
 
     private fun hideWriteMessageButton() {
         ObjectAnimator.ofFloat(writeMessageButton, "translationX", 300f).apply {
             duration = 500
+            interpolator = AccelerateDecelerateInterpolator()
             start()
         }
     }
@@ -76,6 +109,7 @@ class MainActivity : AppCompatActivity() {
     private fun showWriteMessageButton() {
         ObjectAnimator.ofFloat(writeMessageButton, "translationX", 0f).apply {
             duration = 500
+            interpolator = AccelerateDecelerateInterpolator()
             start()
         }
     }
@@ -86,34 +120,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateUI() {
-        adapter = MessagesAdapter(chitChatViewModel.messages)
+        Log.d(TAG, "Updating the UI")
+
+        adapter?.let {
+            it.messages = chitChatViewModel.messages
+        } ?: run {
+            adapter = MessagesAdapter(chitChatViewModel.messages)
+        }
         recyclerView.adapter = adapter
-        adapter.notifyDataSetChanged()
+
+        //adapter.notifyDataSetChanged()
     }
 
     inner class MessageHolder(view: View) : RecyclerView.ViewHolder(view) {
-        private var messageLikeState: MessageLikeState = MessageLikeState.Neither
         private var message: Message = Message()
         private var clientTextView: TextView = view.findViewById(R.id.textView_client)
         private var dateTextView: TextView = view.findViewById(R.id.textView_date)
         private var messageTextView: TextView = view.findViewById(R.id.textView_message)
         private var likeTextView: TextView = view.findViewById(R.id.textView_like)
         private var dislikeTextView: TextView = view.findViewById(R.id.textView_dislike)
+        private var geoTextView: TextView = view.findViewById(R.id.textView_geo)
 
         init {
             likeTextView.setOnClickListener {
-                if (messageLikeState == MessageLikeState.Liked) {
-                    setMessagedLiked(MessageLikeState.Neither)
-                } else {
-                    setMessagedLiked(MessageLikeState.Liked)
+                if (message.likedByUser == null) {
+                    setMessagedLiked(true)
+                    updateLikeUI()
                 }
             }
 
             dislikeTextView.setOnClickListener {
-                if (messageLikeState == MessageLikeState.Disliked) {
-                    setMessagedLiked(MessageLikeState.Neither)
-                } else {
-                    setMessagedLiked(MessageLikeState.Disliked)
+                if (message.likedByUser == null) {
+                    setMessagedLiked(false)
+                    updateLikeUI()
                 }
             }
         }
@@ -127,22 +166,43 @@ class MainActivity : AppCompatActivity() {
             messageTextView.text = message.message
             likeTextView.text = message.likes.toString()
             dislikeTextView.text = message.dislikes.toString()
+
+            if (message.loc[0] != null) {
+                geoTextView.text = resources.getString(R.string.location, message.loc[0], message.loc[1]) //"${message.loc[0]}, ${message.loc[1]}"
+                geoTextView.visibility = View.VISIBLE
+            } else {
+                geoTextView.visibility = View.GONE
+            }
+
+            updateLikeUI()
         }
 
-        private fun setMessagedLiked(likeState: MessageLikeState) {
-            messageLikeState = likeState
-            when (messageLikeState) {
-                MessageLikeState.Liked -> {
+        private fun setMessagedLiked(isLiked: Boolean) {
+
+            val result = tryLikeMessage(message._id, isLiked)
+            if (!result)
+                return
+
+            message.likedByUser = isLiked
+            if (isLiked) {
+                chitChatViewModel.likeMessage(message._id) { updateUI() }
+            } else {
+                chitChatViewModel.dislikeMessage(message._id) { updateUI() }
+            }
+        }
+
+        private fun updateLikeUI() {
+            when {
+                message.likedByUser == null -> {
+                    return
+                }
+                message.likedByUser!! -> {
                     setDrawablesColorFilter(likeTextView, ResourcesCompat.getColor(resources, R.color.like, null))
                     setDrawablesColorFilter(dislikeTextView, ResourcesCompat.getColor(resources, R.color.grayed_out, null))
                 }
-                MessageLikeState.Disliked -> {
+                else -> {
                     setDrawablesColorFilter(likeTextView, ResourcesCompat.getColor(resources, R.color.grayed_out, null))
                     setDrawablesColorFilter(dislikeTextView, ResourcesCompat.getColor(resources, R.color.dislike, null))
-                }
-                MessageLikeState.Neither -> {
-                    setDrawablesColorFilter(likeTextView, ResourcesCompat.getColor(resources, R.color.grayed_out, null))
-                    setDrawablesColorFilter(dislikeTextView, ResourcesCompat.getColor(resources, R.color.grayed_out, null))
                 }
             }
         }
@@ -177,9 +237,12 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    enum class MessageLikeState {
-        Neither,
-        Liked,
-        Disliked
+    override fun onMessageSend(msg: String) {
+        Log.d(TAG, "On message send: $msg")
+        chitChatViewModel.sendMessage(msg, null, null) { updateUI() }
+    }
+
+    override fun onMessageDialogClosed() {
+        showWriteMessageButton()
     }
 }

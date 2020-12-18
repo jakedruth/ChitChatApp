@@ -21,11 +21,21 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/textView_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sample_date"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView_client" />
+
+    <TextView
         android:id="@+id/textView_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:text="@string/lorem_ipsum"
+        android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView_date" />
 
@@ -57,6 +67,17 @@
         app:layout_constraintStart_toEndOf="@+id/textView_like"
         app:layout_constraintTop_toTopOf="@+id/textView_like" />
 
+    <TextView
+        android:id="@+id/textView_geo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawablePadding="5dp"
+        android:gravity="center_vertical"
+        app:drawableLeftCompat="@drawable/ic_twotone_location_on_24"
+        app:drawableTint="@android:color/holo_red_light"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textView_dislike" />
+
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="361dp"
@@ -68,14 +89,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView_like"
         tools:srcCompat="@android:drawable/divider_horizontal_dark" />
-
-    <TextView
-        android:id="@+id/textView_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/sample_date"
-        android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView_client" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
